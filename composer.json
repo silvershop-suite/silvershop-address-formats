@@ -1,5 +1,5 @@
 {
-    "name": "silvershop/address-formats",
+    "name": "silvershop-suite/address-formats",
     "description": "Per-country address field rules for SilverShop: labels, required fields, postcode validation and formatting. Fixes per-country checkout and provides a reusable address formatter.",
     "type": "silverstripe-vendormodule",
     "license": "BSD-3-Clause",

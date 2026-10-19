@@ -48,7 +48,7 @@ SilverShop\AddressFormats\AddressFormatRegistry:
 ## Installation
 
 ```bash
-composer require silvershop/address-formats
+composer require silvershop-suite/address-formats
 ```
 
 Then run `dev/build`.
