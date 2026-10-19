@@ -97,10 +97,21 @@
                 if (lbl) { lbl.textContent = labels[name]; }
             }
 
+            // Net rule: a field is `required` iff it is actually visible. A field can be hidden two ways — this
+            // country hides it (addressformat-hidden, set just above), or an outer layer collapsed its whole
+            // block (the storefront "billing same as delivery" toggle sets display:none on .checkout-section--
+            // billing). offsetParent is null whenever the field or any ancestor is display:none, so it catches
+            // both. Never mark a hidden, un-focusable control `required`: the browser then refuses to submit the
+            // form ("an invalid form control ... is not focusable"). On a VISIBLE required field we DO set native
+            // HTML5 required — native constraint validation, aria-required for assistive tech, and the red
+            // asterisk (Bug F, via the .required class). SilverStripe still enforces required server-side, so a
+            // field hidden/cleared here can never let bad data through.
             var req = !isHidden && required.indexOf(name) !== -1;
-            input.required = req;
-            if (req) { input.setAttribute('aria-required', 'true'); } else { input.removeAttribute('aria-required'); }
-            if (box) { box.classList.toggle('required', req); }
+            var visible = !!(box && box.offsetParent !== null);
+            var effectiveReq = req && visible;
+            input.required = effectiveReq;
+            if (effectiveReq) { input.setAttribute('aria-required', 'true'); } else { input.removeAttribute('aria-required'); }
+            if (box) { box.classList.toggle('required', effectiveReq); }
 
             if (name === 'PostalCode') {
                 if (rule.postcodePattern) { input.setAttribute('pattern', rule.postcodePattern); }
@@ -129,6 +140,12 @@
             if (countryField) {
                 countryField.addEventListener('change', function () { apply(scope, rules); });
             }
+            // Re-apply when an outer layer changes this block's visibility (e.g. the storefront
+            // "billing same as delivery" toggle collapses/expands .checkout-section--billing). The
+            // switcher only re-runs on country change otherwise, so without this the asterisk +
+            // native `required` would not follow the block being shown/hidden. Keeps the net rule
+            // (required iff visible) true whichever module shows or hides the field.
+            document.addEventListener('addressformat:refresh', function () { apply(scope, rules); });
             apply(scope, rules);
         });
     }
