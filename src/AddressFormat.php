@@ -19,6 +19,11 @@ class AddressFormat
      * @param string[]      $format        ordered line templates, e.g. '{PostalCode} {City}'
      * @param string        $postcodeTransform normalisation applied on save: '', 'upper', 'nl' or 'ca'
      * @param bool          $houseNumber   whether this country uses a separate house-number field
+     * @param array<int, string[]> $fieldGroups groups of managed fields to render on a single row (e.g. NL:
+     *                                      [[Address, HouseNumber], [PostalCode, City]]); each other field stays on its
+     *                                      own full-width row
+     * @param string[]        $narrowFields managed fields rendered narrow inside their row group (e.g. NL: HouseNumber,
+     *                                      PostalCode)
      */
     public function __construct(
         private readonly string $country,
@@ -29,6 +34,8 @@ class AddressFormat
         private readonly array $format,
         private readonly string $postcodeTransform = '',
         private readonly bool $houseNumber = false,
+        private readonly array $fieldGroups = [],
+        private readonly array $narrowFields = [],
     ) {
     }
 
@@ -86,6 +93,27 @@ class AddressFormat
     public function getFormat(): array
     {
         return $this->format;
+    }
+
+    /**
+     * Groups of managed fields to render together on one row (e.g. NL: street + house number, postcode + city).
+     * Empty means no row grouping. Each inner array lists the field names in the order they should appear in the row.
+     *
+     * @return array<int, string[]>
+     */
+    public function fieldGroups(): array
+    {
+        return $this->fieldGroups;
+    }
+
+    /**
+     * Managed fields rendered as a narrow field within their row group (e.g. NL: HouseNumber, PostalCode).
+     *
+     * @return string[]
+     */
+    public function narrowFields(): array
+    {
+        return $this->narrowFields;
     }
 
     /**

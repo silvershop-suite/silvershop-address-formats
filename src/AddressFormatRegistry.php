@@ -64,13 +64,16 @@ class AddressFormatRegistry
             array_values((array) ($merged['format'] ?? [])),
             (string) ($merged['postcode_transform'] ?? ''),
             (bool) ($merged['house_number'] ?? false),
+            array_values((array) ($merged['field_groups'] ?? [])),
+            array_values((array) ($merged['narrow_fields'] ?? [])),
         );
     }
 
     /**
      * Per-country rules for the client switcher, keyed by uppercase ISO code plus `default`. Each entry is
-     * `{labels, hidden, required, postcodePattern}` — everything the JS needs to re-render the address form without a
-     * round-trip. Field labels are the address fields the form manages (Address/AddressLine2/City/State/PostalCode).
+     * `{labels, hidden, required, postcodePattern, groups, narrow}` — everything the JS needs to re-render the address
+     * form without a round-trip: relabel/hide/require fields, and lay out the configured row groups (narrow members
+     * flagged). Field labels are the address fields the form manages (Address/AddressLine2/City/State/PostalCode).
      *
      * @return array<string, array<string, mixed>>
      */
@@ -99,6 +102,10 @@ class AddressFormatRegistry
                 'hidden' => $hidden,
                 'required' => array_values($format->getRequired()),
                 'postcodePattern' => $format->htmlPostcodePattern(),
+                // Row layout is applied client-side (the checkout component flattens server-built composites):
+                // which managed fields pair onto one row, and which of them render narrow.
+                'groups' => array_values($format->fieldGroups()),
+                'narrow' => array_values($format->narrowFields()),
             ];
         }
 

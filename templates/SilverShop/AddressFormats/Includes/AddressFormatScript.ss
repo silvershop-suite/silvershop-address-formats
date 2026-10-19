@@ -17,10 +17,67 @@
         return scope.querySelector('[name="Country"], [name$="_Country"]');
     }
 
+    // The element whose direct children are the field holders (the responsive address grid on the checkout).
+    function layoutContainer(scope) {
+        if (scope.classList && scope.classList.contains('silvershop-address-fields')) { return scope; }
+        return scope.querySelector('.silvershop-address-fields') || scope;
+    }
+
+    function fieldHolderIn(container, name) {
+        var input = container.querySelector('[data-addressformat-field="' + name + '"]');
+        if (!input) { return null; }
+        var box = holder(input);
+        return (box && box.parentNode === container) ? box : null;
+    }
+
+    // Pair configured fields onto shared flex rows (e.g. NL: street + narrow house number, then narrow postcode +
+    // city). The checkout component flattens any server-built composites, so the rows are built here from the rules
+    // JSON, keyed on the surviving data-addressformat-field attributes. Idempotent + reversible: the original child
+    // order is snapshotted once and restored before each (re)grouping, so switching country cleanly undoes it.
+    function applyLayout(container, groups, narrow) {
+        if (!container) { return; }
+        narrow = narrow || [];
+
+        if (!container.__afOrder) {
+            container.__afOrder = Array.prototype.slice.call(container.children);
+        }
+
+        // Unwrap any existing row groups (move their children back out, drop the wrapper).
+        container.querySelectorAll('.addressformat-field-group').forEach(function (row) {
+            while (row.firstChild) { container.appendChild(row.firstChild); }
+            if (row.parentNode) { row.parentNode.removeChild(row); }
+        });
+        // Restore the original child order, then clear narrow flags.
+        container.__afOrder.forEach(function (el) {
+            if (el && el.parentNode === container) { container.appendChild(el); }
+        });
+        container.querySelectorAll('.addressformat-narrow').forEach(function (el) {
+            el.classList.remove('addressformat-narrow');
+        });
+
+        // Build each configured group (needs at least two present fields).
+        (groups || []).forEach(function (group) {
+            var members = [];
+            (group || []).forEach(function (name) {
+                var box = fieldHolderIn(container, name);
+                if (box) { members.push({ name: name, el: box }); }
+            });
+            if (members.length < 2) { return; }
+
+            var row = document.createElement('div');
+            row.className = 'addressformat-field-group';
+            container.insertBefore(row, members[0].el);
+            members.forEach(function (item) {
+                if (narrow.indexOf(item.name) !== -1) { item.el.classList.add('addressformat-narrow'); }
+                row.appendChild(item.el);
+            });
+        });
+    }
+
     function apply(scope, rules) {
         var countryField = countryIn(scope);
         var code = countryField ? String(countryField.value || '').toUpperCase() : '';
-        var rule = rules[code] || rules['default'] || { hidden: [], required: [], labels: {}, postcodePattern: '' };
+        var rule = rules[code] || rules['default'] || { hidden: [], required: [], labels: {}, postcodePattern: '', groups: [], narrow: [] };
         var hidden = rule.hidden || [];
         var required = rule.required || [];
         var labels = rule.labels || {};
@@ -50,6 +107,8 @@
                 else { input.removeAttribute('pattern'); }
             }
         });
+
+        applyLayout(layoutContainer(scope), rule.groups, rule.narrow);
 
         scope.dispatchEvent(new CustomEvent('addressformat:changed', { detail: { country: code }, bubbles: true }));
     }

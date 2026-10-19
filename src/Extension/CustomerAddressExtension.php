@@ -81,6 +81,12 @@ class CustomerAddressExtension extends Extension
             }
         }
 
+        // NB: the per-country field order + row grouping (e.g. NL: street+house, postcode+city, narrow members) are
+        // NOT built here. SilverShop's Checkout\Component\Address re-wraps/namespaces these fields for the checkout
+        // form, which discards any server-built CompositeField wrappers and re-ordering before render. So the row
+        // layout is driven entirely client-side by the switcher (from AddressFormatRegistry::rulesForJs()'s
+        // `groups`/`narrow`), keyed on the `data-addressformat-field` attributes set above — which survives both the
+        // component flattening and live country switching.
         if ($live) {
             $fields->push($this->switcherField());
         }

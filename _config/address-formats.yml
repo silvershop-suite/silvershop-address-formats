@@ -23,8 +23,12 @@ SilverShop\AddressFormats\AddressFormatRegistry:
         - '{Country}'
     NL:
       required: ['Address', 'HouseNumber', 'PostalCode', 'City']
-      hidden: ['State']
+      hidden: ['State', 'AddressLine2']
       house_number: true
+      field_groups:
+        - ['Address', 'HouseNumber']
+        - ['PostalCode', 'City']
+      narrow_fields: ['HouseNumber', 'PostalCode']
       labels:
         Address: 'Straat'
         HouseNumber: 'Huisnr.'
@@ -47,6 +51,9 @@ SilverShop\AddressFormats\AddressFormatRegistry:
       required: ['Address', 'HouseNumber', 'PostalCode', 'City']
       hidden: ['State']
       house_number: true
+      field_groups:
+        - ['Address', 'HouseNumber']
+      narrow_fields: ['HouseNumber']
       labels:
         PostalCode: 'PLZ'
         City: 'Stadt'

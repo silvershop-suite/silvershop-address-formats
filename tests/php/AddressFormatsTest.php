@@ -167,6 +167,36 @@ class AddressFormatsTest extends SapphireTest
         $this->assertArrayNotHasKey('HouseNumber', $us->getRequiredFields());
     }
 
+    public function testNlHiddenFieldsAndLayoutRules(): void
+    {
+        // Server still hides State + AddressLine2 for NL (kept in the DOM, marked for the switcher) and tags every
+        // managed field so the client switcher can relabel / hide / require / lay them out.
+        $nl = Address::create(['Country' => 'NL']);
+        $fields = $nl->getFrontEndFields();
+
+        foreach (['AddressLine2', 'State'] as $name) {
+            $field = $fields->dataFieldByName($name);
+            $this->assertNotNull($field, "$name kept in the DOM with live switching on");
+            $this->assertStringContainsString(
+                'addressformat-hidden',
+                (string) $field->extraClass(),
+                "$name is hidden for NL"
+            );
+        }
+        $this->assertSame('Address', $fields->dataFieldByName('Address')->getAttribute('data-addressformat-field'));
+        $this->assertSame('PostalCode', $fields->dataFieldByName('PostalCode')->getAttribute('data-addressformat-field'));
+
+        // The per-country row layout the switcher applies (the checkout component flattens server composites, so this
+        // is driven client-side from rulesForJs): NL pairs street+house and postcode+city, with narrow members flagged.
+        $rules = AddressFormatRegistry::singleton()->rulesForJs();
+        $this->assertSame([['Address', 'HouseNumber'], ['PostalCode', 'City']], $rules['NL']['groups']);
+        $this->assertSame(['HouseNumber', 'PostalCode'], $rules['NL']['narrow']);
+
+        // Non-configured countries get no row grouping (US unaffected).
+        $this->assertSame([], $rules['US']['groups']);
+        $this->assertSame([], $rules['US']['narrow']);
+    }
+
     public function testHouseNumberComposedIntoAddressString(): void
     {
         $nl = Address::create([
