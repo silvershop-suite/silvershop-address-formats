@@ -1,3 +1,4 @@
 de:
   SilverShop\AddressFormats\Extension\CustomerAddressExtension:
+    HouseNumber: 'Hausnummer'
     InvalidPostcode: 'Bitte geben Sie eine gültige Postleitzahl für das ausgewählte Land ein.'

@@ -167,6 +167,29 @@ class AddressFormatsTest extends SapphireTest
         $this->assertArrayNotHasKey('HouseNumber', $us->getRequiredFields());
     }
 
+    public function testCmsFieldsHaveConventionalOrder(): void
+    {
+        // updateCMSFields reorders the admin Address edit form (member addresses + order-admin clone-on-write edit)
+        // into a conventional sequence, instead of the raw $db order (Country/State/City first, name last, the
+        // extension's HouseNumber appended at the very end).
+        $address = Address::create(['Country' => 'NL']);
+        $managed = [
+            'FirstName', 'Surname', 'Company',
+            'Address', 'HouseNumber', 'AddressLine2',
+            'PostalCode', 'City', 'State', 'Country',
+            'Phone',
+        ];
+        $fields = $address->getCMSFields();
+        $rendered = array_values(array_filter(
+            array_keys($fields->dataFields()),
+            static fn (string $name): bool => in_array($name, $managed, true)
+        ));
+        $this->assertSame($managed, $rendered);
+
+        // HouseNumber gets a translated admin-locale label, not the raw scaffold "House Number".
+        $this->assertSame('House number', $fields->dataFieldByName('HouseNumber')->Title());
+    }
+
     public function testNlHiddenFieldsAndLayoutRules(): void
     {
         // Server still hides State + AddressLine2 for NL (kept in the DOM, marked for the switcher) and tags every

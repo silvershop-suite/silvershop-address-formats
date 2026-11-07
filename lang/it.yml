@@ -1,3 +1,4 @@
 it:
   SilverShop\AddressFormats\Extension\CustomerAddressExtension:
+    HouseNumber: 'Civico'
     InvalidPostcode: 'Inserisci un codice postale valido per il paese selezionato.'

@@ -93,6 +93,44 @@ class CustomerAddressExtension extends Extension
     }
 
     /**
+     * Give the Address CMS edit form a conventional field order: name, company, street + house number, address line 2,
+     * postcode + city, state, country, phone. Core scaffolds the raw $db order (Country / State / City first, name
+     * last) and the extension's HouseNumber lands at the very end, which reads oddly for an address form. The field
+     * instances are moved (removed + re-added), not recreated, so any decoration (Fluent, etc.) is preserved. Applies
+     * everywhere Address::getCMSFields() is used — member addresses and the order-admin clone-on-write edit.
+     */
+    public function updateCMSFields(FieldList $fields): void
+    {
+        $order = [
+            'FirstName', 'Surname', 'Company',
+            'Address', 'HouseNumber', 'AddressLine2',
+            'PostalCode', 'City', 'State', 'Country',
+            'Phone',
+        ];
+
+        $ordered = [];
+        foreach ($order as $name) {
+            $field = $fields->dataFieldByName($name);
+            if ($field) {
+                $ordered[] = $field;
+                $fields->removeByName($name);
+            }
+        }
+
+        foreach ($ordered as $field) {
+            $fields->addFieldToTab('Root.Main', $field);
+        }
+
+        // Core scaffolds HouseNumber (added as $db by this extension) with the raw "House Number" label; give it a
+        // translated admin-locale title like every other address field. (The front-end uses the country-specific
+        // labelFor(); the CMS form is a single static form, so an admin-locale label is the right fit here.)
+        $houseNumber = $fields->dataFieldByName('HouseNumber');
+        if ($houseNumber) {
+            $houseNumber->setTitle(_t(self::class . '.HouseNumber', 'House number'));
+        }
+    }
+
+    /**
      * Replace the per-country address requirements: drop State where it isn't used, and ensure the country's required
      * address fields are present. Non-address requirements set elsewhere are left untouched.
      *

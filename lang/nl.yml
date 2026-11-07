@@ -1,3 +1,4 @@
 nl:
   SilverShop\AddressFormats\Extension\CustomerAddressExtension:
+    HouseNumber: 'Huisnummer'
     InvalidPostcode: 'Voer een geldige postcode in voor het geselecteerde land.'

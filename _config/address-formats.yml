@@ -199,3 +199,13 @@ SilverShop\AddressFormats\AddressFormatRegistry:
       hidden: []
       labels: {State: 'Prefecture', PostalCode: 'Postal code', City: 'City / Ward'}
       postcode_regex: '/^[0-9]{3}-?[0-9]{4}$/'
+---
+Name: silvershop-address-formats-orderadmin
+Only:
+  moduleexists: 'silvershop-suite/order-admin'
+---
+# Format the order-admin's shipping/billing address cards per country, from the outside (the order-admin fires
+# an `updateAddressLines` seam and has no dependency on this module). Only active when order-admin is installed.
+SilverShop\OrderAdmin\Form\OrderAddressField:
+  extensions:
+    - SilverShop\AddressFormats\Extension\OrderAddressFieldExtension
