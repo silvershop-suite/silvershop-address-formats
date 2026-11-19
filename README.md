@@ -17,7 +17,7 @@ safe `default` that keeps existing behaviour where no country rule applies.
   (`updateFormFields`) and sets the per-country required fields (`updateRequiredFields`), **fixing the
   State-required checkout blocker**.
 - **`AddressFormatter`** — renders address-like data to a one-line or multi-line address for a country. Reused
-  by [store-profile](https://github.com/RVXD/silvershop-store-profile), shipping labels and invoicing.
+  by [store-profile](https://github.com/silvershop-suite/silvershop-store-profile), shipping labels and invoicing.
 - **Live country switching** (default on) — the front-end form re-labels, shows/hides and re-requires fields *as the
   customer changes Country*, with a no-JS baseline. Overridable template + JS (see below).
 - **Postcode validation + normalisation** — the per-country `postcode_regex` is enforced on the model *and* exposed as
@@ -119,7 +119,7 @@ postcode validation + normalisation (~23 bundled countries), opt-in house-number
 libaddressinput provider** for global coverage. **i18n:** the per-country field *labels* are
 configuration data (not translatable); the only UI string is the postcode validation message, shipped in en + nl +
 de + fr + es + it. Planned: `HouseNumber` split (NL/DE) and a pluggable libaddressinput provider for full global
-coverage — see [`PLAN-address-formats-v1.1.md`](https://github.com/RVXD/silvershop-store-profile) in the consuming
+coverage — see [`PLAN-address-formats-v1.1.md`](https://github.com/silvershop-suite/silvershop-store-profile) in the consuming
 project for the roadmap.
 
 ## Licence
