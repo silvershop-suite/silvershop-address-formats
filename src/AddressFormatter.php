@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace SilverShop\AddressFormats;
 
+use SilverShop\Model\Address;
+use SilverShop\ORM\FieldType\ShopCountry;
 use SilverStripe\Core\Convert;
 use SilverStripe\Core\Injector\Injectable;
 
@@ -42,6 +44,29 @@ class AddressFormatter
         }
 
         return $lines;
+    }
+
+    /**
+     * The country-correct body lines of a stored address (street + house number, postcode + city, ..., country). Used by
+     * the front-end address template ({@see \SilverShop\AddressFormats\Extension\CustomerAddressExtension::FormattedAddressLines()})
+     * and the order-admin address card.
+     *
+     * @return list<string>
+     */
+    public function linesFor(Address $address): array
+    {
+        $country = trim((string) $address->getField('Country'));
+        $countryField = $address->dbObject('Country');
+
+        return $this->lines([
+            'Address' => (string) $address->Address,
+            'HouseNumber' => (string) $address->getField('HouseNumber'),
+            'AddressLine2' => (string) $address->AddressLine2,
+            'City' => (string) $address->City,
+            'State' => (string) $address->State,
+            'PostalCode' => (string) $address->PostalCode,
+            'Country' => $countryField instanceof ShopCountry ? $countryField->Nice() : $country,
+        ], $country !== '' ? $country : null);
     }
 
     /**

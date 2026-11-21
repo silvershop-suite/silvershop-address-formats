@@ -1,0 +1,9 @@
+---
+Name: silvershop-address-formats-modules
+Before: '#modules-other'
+---
+# Rank this module above other modules (not above the project or a theme) so its `SilverShop/Model/Address.ss`
+# replaces silvershop/core's field-by-field address template. Same mechanism framework/cms/admin use.
+SilverStripe\Core\Manifest\ModuleManifest:
+  module_priority:
+    - silvershop-suite/address-formats

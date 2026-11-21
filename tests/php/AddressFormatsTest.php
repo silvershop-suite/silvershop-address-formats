@@ -307,4 +307,35 @@ class AddressFormatsTest extends SapphireTest
             $formatter->format($us, 'US')
         );
     }
+
+    public function testAddressTemplateUsesTheCountryLayout(): void
+    {
+        $nl = Address::create([
+            'FirstName' => 'Anna',
+            'Surname' => 'Jansen',
+            'Address' => 'Teststraat',
+            'HouseNumber' => '1',
+            'PostalCode' => '2611 AA',
+            'City' => 'Delft',
+            'State' => 'ZH',
+            'Country' => 'NL',
+        ]);
+        $html = (string) $nl->forTemplate();
+
+        $this->assertStringContainsString('Teststraat 1', $html, 'the house number is shown with the street');
+        $this->assertStringContainsString('2611 AA Delft', $html, 'postcode and city on one line');
+        $this->assertStringNotContainsString('ZH', $html, 'NL addresses have no State line');
+        $this->assertLessThan(strpos($html, '2611 AA Delft'), strpos($html, 'Teststraat 1'));
+        $this->assertStringContainsString('Anna Jansen', $html);
+
+        $us = Address::create([
+            'Address' => '1 Main Street',
+            'PostalCode' => '94105',
+            'City' => 'San Francisco',
+            'State' => 'CA',
+            'Country' => 'US',
+        ]);
+        $this->assertStringContainsString('San Francisco', (string) $us->forTemplate());
+        $this->assertStringContainsString('CA', (string) $us->forTemplate(), 'countries with a State keep it');
+    }
 }

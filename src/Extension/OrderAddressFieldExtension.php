@@ -6,7 +6,6 @@ namespace SilverShop\AddressFormats\Extension;
 
 use SilverShop\AddressFormats\AddressFormatter;
 use SilverShop\Model\Address;
-use SilverShop\ORM\FieldType\ShopCountry;
 use SilverStripe\Core\Extension;
 
 /**
@@ -27,17 +26,6 @@ class OrderAddressFieldExtension extends Extension
      */
     public function updateAddressLines(array &$lines, Address $address): void
     {
-        $country = trim((string) $address->getField('Country'));
-        $countryField = $address->dbObject('Country');
-
-        $lines = AddressFormatter::create()->lines([
-            'Address' => (string) $address->Address,
-            'HouseNumber' => (string) $address->getField('HouseNumber'),
-            'AddressLine2' => (string) $address->AddressLine2,
-            'City' => (string) $address->City,
-            'State' => (string) $address->State,
-            'PostalCode' => (string) $address->PostalCode,
-            'Country' => $countryField instanceof ShopCountry ? $countryField->Nice() : $country,
-        ], $country !== '' ? $country : null);
+        $lines = AddressFormatter::create()->linesFor($address);
     }
 }

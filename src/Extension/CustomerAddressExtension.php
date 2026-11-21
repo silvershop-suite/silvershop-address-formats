@@ -6,12 +6,14 @@ namespace SilverShop\AddressFormats\Extension;
 
 use SilverShop\AddressFormats\AddressFormat;
 use SilverShop\AddressFormats\AddressFormatRegistry;
+use SilverShop\AddressFormats\AddressFormatter;
 use SilverStripe\Core\Extension;
 use SilverStripe\Forms\FieldList;
 use SilverStripe\Forms\LiteralField;
 use SilverStripe\Forms\TextField;
 use SilverStripe\Core\Validation\ValidationResult;
 use SilverStripe\Model\ArrayData;
+use SilverStripe\Model\List\ArrayList;
 
 /**
  * Applied to {@link \SilverShop\Model\Address}. Makes the customer address form country-aware: relabels and hides
@@ -206,6 +208,21 @@ class CustomerAddressExtension extends Extension
         if ($normalised !== $postcode) {
             $owner->PostalCode = $normalised;
         }
+    }
+
+    /**
+     * The address body in this country's layout (e.g. NL "Straat 1" / "1234 AB Plaats"), one item per line with a
+     * `Line` value. Used by this module's `SilverShop/Model/Address.ss`, which replaces core's field-by-field template
+     * (core shows no house number and puts city and postcode on separate lines).
+     */
+    public function FormattedAddressLines(): ArrayList
+    {
+        $lines = ArrayList::create();
+        foreach (AddressFormatter::create()->linesFor($this->getOwner()) as $line) {
+            $lines->push(ArrayData::create(['Line' => $line]));
+        }
+
+        return $lines;
     }
 
     private function formatFor(): AddressFormat

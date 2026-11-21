@@ -18,6 +18,11 @@ safe `default` that keeps existing behaviour where no country rule applies.
   State-required checkout blocker**.
 - **`AddressFormatter`** — renders address-like data to a one-line or multi-line address for a country. Reused
   by [store-profile](https://github.com/silvershop-suite/silvershop-store-profile), shipping labels and invoicing.
+- **Addresses shown in the country's layout** — this module's `SilverShop/Model/Address.ss` replaces core's
+  field-by-field address template, so the order confirmation page, order emails and account pages show e.g.
+  "Teststraat 1" / "2611 AA Delft" for NL (with the house number) instead of street, city and postcode on separate
+  lines. Template data: `$FormattedAddressLines` (one `$Line` per line). The module ranks itself above other modules
+  (`_config/modules.yml`) so this template wins over core's; a project or theme can still override it.
 - **Live country switching** (default on) — the front-end form re-labels, shows/hides and re-requires fields *as the
   customer changes Country*, with a no-JS baseline. Overridable template + JS (see below).
 - **Postcode validation + normalisation** — the per-country `postcode_regex` is enforced on the model *and* exposed as
