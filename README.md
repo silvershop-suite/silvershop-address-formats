@@ -15,7 +15,9 @@ safe `default` that keeps existing behaviour where no country rule applies.
   `required`, `hidden` (e.g. no State for NL), `postcode_regex`, and a display `format`.
 - **`CustomerAddressExtension`** on `SilverShop\Model\Address` — relabels/hides fields per country
   (`updateFormFields`) and sets the per-country required fields (`updateRequiredFields`), **fixing the
-  State-required checkout blocker**.
+  State-required checkout blocker**. While a checkout form is being submitted, the required fields follow the
+  country chosen on the form (single-page `…ShippingAddress_Country` / `…BillingAddress_Country`, stepped `Country`),
+  not the one saved on the address, so switching country never requires a field that is hidden for the new one.
 - **`AddressFormatter`** — renders address-like data to a one-line or multi-line address for a country. Reused
   by [store-profile](https://github.com/silvershop-suite/silvershop-store-profile), shipping labels and invoicing.
 - **Addresses shown in the country's layout** — this module's `SilverShop/Model/Address.ss` replaces core's

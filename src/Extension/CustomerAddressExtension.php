@@ -7,6 +7,10 @@ namespace SilverShop\AddressFormats\Extension;
 use SilverShop\AddressFormats\AddressFormat;
 use SilverShop\AddressFormats\AddressFormatRegistry;
 use SilverShop\AddressFormats\AddressFormatter;
+use SilverShop\Cart\ShoppingCart;
+use SilverShop\Model\Order;
+use SilverShop\Page\CheckoutPageController;
+use SilverStripe\Control\Controller;
 use SilverStripe\Core\Extension;
 use SilverStripe\Forms\FieldList;
 use SilverStripe\Forms\LiteralField;
@@ -140,7 +144,13 @@ class CustomerAddressExtension extends Extension
      */
     public function updateRequiredFields(array &$fields): void
     {
-        $format = $this->formatFor();
+        // During a checkout submit, follow the country the customer chose on the form, not the one saved on the address:
+        // otherwise a country switch requires fields that are hidden for the new country (NL house number after
+        // switching to BE), and the new country's own fields are only checked when the address is written.
+        $submitted = $this->submittedCheckoutCountry();
+        $format = $submitted !== null
+            ? AddressFormatRegistry::singleton()->formatFor($submitted)
+            : $this->formatFor();
 
         if (!$format->isRequired('State') || $format->isHidden('State')) {
             unset($fields['State']);
@@ -223,6 +233,71 @@ class CustomerAddressExtension extends Extension
         }
 
         return $lines;
+    }
+
+    /**
+     * The country posted for this address by the checkout form being submitted, or null (not a checkout POST, no country
+     * posted, or delivery and billing posted different countries and this address can't be told apart).
+     *
+     * Single-page checkout posts namespaced fields (`…ShippingAddress_Country`, `…BillingAddress_Country`), the stepped
+     * checkout's address steps post `Country`.
+     */
+    private function submittedCheckoutCountry(): ?string
+    {
+        $controller = Controller::curr();
+        if (!$controller instanceof CheckoutPageController) {
+            return null;
+        }
+        $request = $controller->getRequest();
+        if (!$request->isPOST()) {
+            return null;
+        }
+
+        $countries = [];
+        foreach ((array) $request->postVars() as $name => $value) {
+            if (!is_string($name) || !is_string($value) || trim($value) === '') {
+                continue;
+            }
+            if ($name === 'Country' || str_ends_with($name, 'Address_Country')) {
+                $countries[$name] = strtoupper(trim($value));
+            }
+        }
+        if ($countries === []) {
+            return null;
+        }
+        if (count(array_unique($countries)) === 1) {
+            return (string) reset($countries);
+        }
+
+        $type = $this->addressTypeInCart();
+        if ($type !== null) {
+            foreach ($countries as $name => $code) {
+                if (str_ends_with($name, $type . 'Address_Country')) {
+                    return $code;
+                }
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * 'Shipping' or 'Billing' when this (saved) address is only one of the two on the current cart, else null.
+     */
+    private function addressTypeInCart(): ?string
+    {
+        $id = (int) $this->getOwner()->ID;
+        $order = ShoppingCart::curr();
+        if ($id <= 0 || !$order instanceof Order) {
+            return null;
+        }
+        $shipping = (int) $order->getField('ShippingAddressID') === $id;
+        $billing = (int) $order->getField('BillingAddressID') === $id;
+        if ($shipping === $billing) {
+            return null;
+        }
+
+        return $shipping ? 'Shipping' : 'Billing';
     }
 
     private function formatFor(): AddressFormat
