@@ -30,10 +30,10 @@ SilverShop\AddressFormats\AddressFormatRegistry:
         - ['PostalCode', 'City']
       narrow_fields: ['HouseNumber', 'PostalCode']
       labels:
-        Address: 'Straat'
-        HouseNumber: 'Huisnr.'
+        Address: 'Street'
+        HouseNumber: 'HouseNumber'
         PostalCode: 'Postcode'
-        City: 'Plaats'
+        City: 'City'
       postcode_regex: '/^[0-9]{4}\s?[A-Za-z]{2}$/'
       postcode_transform: 'nl'
       format:
@@ -55,10 +55,10 @@ SilverShop\AddressFormats\AddressFormatRegistry:
         - ['Address', 'HouseNumber']
       narrow_fields: ['HouseNumber']
       labels:
-        PostalCode: 'PLZ'
-        City: 'Stadt'
-        Address: 'Straße'
-        HouseNumber: 'Hausnr.'
+        PostalCode: 'Postcode'
+        City: 'City'
+        Address: 'Street'
+        HouseNumber: 'HouseNumber'
       postcode_regex: '/^[0-9]{5}$/'
       format:
         - '{Address} {HouseNumber}'
@@ -69,15 +69,15 @@ SilverShop\AddressFormats\AddressFormatRegistry:
       required: ['Address', 'PostalCode', 'City']
       hidden: ['State']
       labels:
-        PostalCode: 'Code postal'
-        City: 'Ville'
+        PostalCode: 'PostalCode'
+        City: 'City'
       postcode_regex: '/^[0-9]{5}$/'
     GB:
       required: ['Address', 'City', 'PostalCode']
       hidden: ['State']
       labels:
         PostalCode: 'Postcode'
-        City: 'Town / City'
+        City: 'TownCity'
       postcode_regex: '/^[A-Za-z]{1,2}[0-9Rr][0-9A-Za-z]?\s?[0-9][ABD-HJLNP-UW-Zabd-hjlnp-uw-z]{2}$/'
       postcode_transform: 'upper'
       format:
@@ -90,7 +90,7 @@ SilverShop\AddressFormats\AddressFormatRegistry:
       required: ['Address', 'City', 'State', 'PostalCode']
       hidden: []
       labels:
-        PostalCode: 'ZIP code'
+        PostalCode: 'ZipCode'
         State: 'State'
       postcode_regex: '/^[0-9]{5}(-[0-9]{4})?$/'
       format:
@@ -103,7 +103,7 @@ SilverShop\AddressFormats\AddressFormatRegistry:
       hidden: ['State']
       labels:
         PostalCode: 'Postcode'
-        City: 'Town / City'
+        City: 'TownCity'
         AddressLine2: 'Suburb'
       postcode_regex: '/^[0-9]{4}$/'
       format:
@@ -116,8 +116,8 @@ SilverShop\AddressFormats\AddressFormatRegistry:
       hidden: []
       labels:
         PostalCode: 'Postcode'
-        City: 'Suburb / Town'
-        State: 'State / Territory'
+        City: 'SuburbTown'
+        State: 'StateTerritory'
       postcode_regex: '/^[0-9]{4}$/'
       format:
         - '{Address}'
@@ -127,12 +127,12 @@ SilverShop\AddressFormats\AddressFormatRegistry:
     AT:
       required: ['Address', 'PostalCode', 'City']
       hidden: ['State']
-      labels: {PostalCode: 'PLZ', City: 'Stadt'}
+      labels: {PostalCode: 'Postcode', City: 'City'}
       postcode_regex: '/^[0-9]{4}$/'
     CH:
       required: ['Address', 'PostalCode', 'City']
       hidden: ['State']
-      labels: {PostalCode: 'PLZ', City: 'Ort'}
+      labels: {PostalCode: 'Postcode', City: 'City'}
       postcode_regex: '/^[0-9]{4}$/'
     CZ:
       required: ['Address', 'PostalCode', 'City']
@@ -145,7 +145,7 @@ SilverShop\AddressFormats\AddressFormatRegistry:
     ES:
       required: ['Address', 'PostalCode', 'City']
       hidden: ['State']
-      labels: {PostalCode: 'Código postal', City: 'Ciudad'}
+      labels: {PostalCode: 'PostalCode', City: 'City'}
       postcode_regex: '/^[0-9]{5}$/'
     FI:
       required: ['Address', 'PostalCode', 'City']
@@ -154,12 +154,12 @@ SilverShop\AddressFormats\AddressFormatRegistry:
     IE:
       required: ['Address', 'City']
       hidden: ['State']
-      labels: {PostalCode: 'Eircode', City: 'Town / City'}
+      labels: {PostalCode: 'Eircode', City: 'TownCity'}
       postcode_regex: ''
     IT:
       required: ['Address', 'PostalCode', 'City']
       hidden: ['State']
-      labels: {PostalCode: 'CAP', City: 'Città'}
+      labels: {PostalCode: 'Postcode', City: 'City'}
       postcode_regex: '/^[0-9]{5}$/'
     LU:
       required: ['Address', 'PostalCode', 'City']
@@ -172,12 +172,12 @@ SilverShop\AddressFormats\AddressFormatRegistry:
     PL:
       required: ['Address', 'PostalCode', 'City']
       hidden: ['State']
-      labels: {PostalCode: 'Kod pocztowy', City: 'Miasto'}
+      labels: {PostalCode: 'PostalCode', City: 'City'}
       postcode_regex: '/^[0-9]{2}-[0-9]{3}$/'
     PT:
       required: ['Address', 'PostalCode', 'City']
       hidden: ['State']
-      labels: {PostalCode: 'Código postal', City: 'Cidade'}
+      labels: {PostalCode: 'PostalCode', City: 'City'}
       postcode_regex: '/^[0-9]{4}-[0-9]{3}$/'
     SE:
       required: ['Address', 'PostalCode', 'City']
@@ -186,7 +186,7 @@ SilverShop\AddressFormats\AddressFormatRegistry:
     CA:
       required: ['Address', 'City', 'State', 'PostalCode']
       hidden: []
-      labels: {State: 'Province', PostalCode: 'Postal code'}
+      labels: {State: 'Province', PostalCode: 'PostalCode'}
       postcode_regex: '/^[A-Za-z][0-9][A-Za-z]\s?[0-9][A-Za-z][0-9]$/'
       postcode_transform: 'ca'
       format:
@@ -197,7 +197,7 @@ SilverShop\AddressFormats\AddressFormatRegistry:
     JP:
       required: ['Address', 'City', 'State', 'PostalCode']
       hidden: []
-      labels: {State: 'Prefecture', PostalCode: 'Postal code', City: 'City / Ward'}
+      labels: {State: 'Prefecture', PostalCode: 'PostalCode', City: 'CityWard'}
       postcode_regex: '/^[0-9]{3}-?[0-9]{4}$/'
 ---
 Name: silvershop-address-formats-orderadmin

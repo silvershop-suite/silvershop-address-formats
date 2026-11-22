@@ -51,9 +51,8 @@ class StreetHintAndLayoutTest extends SapphireTest
     {
         $street = $this->fields('NL')->dataFieldByName('Address');
 
-        $this->assertSame('Straat', (string) $street->Title());
-        $this->assertNotSame('', (string) $street->getAttribute('data-addressformat-label'));
-        $this->assertNotSame('Straat', $street->getAttribute('data-addressformat-label'));
+        $this->assertSame('Street', (string) $street->Title());
+        $this->assertSame('Address', $street->getAttribute('data-addressformat-label'), 'core label, for switching back');
     }
 
     public function testWithoutLiveSwitchingTheHintIsSimplyLeftOut(): void

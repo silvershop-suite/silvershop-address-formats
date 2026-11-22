@@ -28,13 +28,13 @@ class AddressingRuleProvider
         AddressField::POSTAL_CODE => 'PostalCode',
     ];
 
-    /** libaddressinput field/area type → a human label. Unknown types are title-cased. */
+    /** libaddressinput field/area type → an {@link AddressLabels} concept. Unknown types are title-cased (English). */
     private const TYPE_LABELS = [
         'area' => 'Area',
         'county' => 'County',
         'department' => 'Department',
         'district' => 'District',
-        'do_si' => 'Do / Si',
+        'do_si' => 'DoSi',
         'emirate' => 'Emirate',
         'island' => 'Island',
         'oblast' => 'Oblast',
@@ -42,15 +42,15 @@ class AddressingRuleProvider
         'prefecture' => 'Prefecture',
         'province' => 'Province',
         'state' => 'State',
-        'zip' => 'ZIP code',
+        'zip' => 'ZipCode',
         'postal' => 'Postcode',
         'eircode' => 'Eircode',
-        'pin' => 'PIN code',
-        'post_town' => 'Post town',
+        'pin' => 'PinCode',
+        'post_town' => 'PostTown',
         'city' => 'City',
         'suburb' => 'Suburb',
         'townland' => 'Townland',
-        'village_township' => 'Village / Township',
+        'village_township' => 'VillageTownship',
     ];
 
     public static function available(): bool

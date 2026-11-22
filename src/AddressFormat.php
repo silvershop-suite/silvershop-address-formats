@@ -83,9 +83,15 @@ class AddressFormat
         return in_array($field, $this->hidden, true);
     }
 
+    /**
+     * The field's label for this country in the shop's language (see {@link AddressLabels}), or $default when the
+     * country doesn't relabel the field.
+     */
     public function labelFor(string $field, string $default): string
     {
-        return $this->labels[$field] ?? $default;
+        $label = (string) ($this->labels[$field] ?? '');
+
+        return $label !== '' ? AddressLabels::translate($label) : $default;
     }
 
     public function getPostcodeRegex(): string

@@ -7,6 +7,7 @@ namespace SilverShop\AddressFormats\Extension;
 use SilverShop\AddressFormats\AddressFormat;
 use SilverShop\AddressFormats\AddressFormatRegistry;
 use SilverShop\AddressFormats\AddressFormatter;
+use SilverShop\AddressFormats\AddressLabels;
 use SilverShop\Cart\ShoppingCart;
 use SilverShop\Model\Order;
 use SilverShop\Page\CheckoutPageController;
@@ -56,7 +57,10 @@ class CustomerAddressExtension extends Extension
             && $fields->dataFieldByName('Address')
             && ($live || $format->hasHouseNumber())
         ) {
-            $fields->insertAfter('Address', TextField::create('HouseNumber', $format->labelFor('HouseNumber', 'No.')));
+            $fields->insertAfter('Address', TextField::create(
+                'HouseNumber',
+                $format->labelFor('HouseNumber', AddressLabels::translate('HouseNumber'))
+            ));
         }
 
         foreach (self::MANAGED_FIELDS as $name) {

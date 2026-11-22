@@ -44,7 +44,7 @@ class AddressFormatsTest extends SapphireTest
         $registry = AddressFormatRegistry::singleton();
 
         $es = $registry->formatFor('ES');
-        $this->assertSame('Código postal', $es->labelFor('PostalCode', 'x'));
+        $this->assertSame('Postal code', $es->labelFor('PostalCode', 'x'), 'in the shop language (en here)');
         $this->assertTrue($es->isHidden('State'));
         $this->assertTrue($es->postcodeValid('28013'));
 
@@ -154,9 +154,9 @@ class AddressFormatsTest extends SapphireTest
 
         $hn = $fields->dataFieldByName('HouseNumber');
         $this->assertNotNull($hn, 'HouseNumber field added for NL');
-        $this->assertSame('Huisnr.', $hn->Title());
+        $this->assertSame('House no.', $hn->Title(), 'labels follow the shop language (en here)');
         $this->assertStringNotContainsString('addressformat-hidden', (string) $hn->extraClass(), 'shown for NL');
-        $this->assertSame('Straat', $fields->dataFieldByName('Address')->Title());
+        $this->assertSame('Street', $fields->dataFieldByName('Address')->Title());
         $this->assertArrayHasKey('HouseNumber', $nl->getRequiredFields());
 
         $us = Address::create(['Country' => 'US']);
@@ -276,7 +276,7 @@ class AddressFormatsTest extends SapphireTest
         $rules = AddressingRuleProvider::singleton()->rulesFor('US');
         $this->assertNotNull($rules);
         $this->assertContains('State', $rules['required']);
-        $this->assertSame('ZIP code', $rules['labels']['PostalCode']);
+        $this->assertSame('ZipCode', $rules['labels']['PostalCode'], 'a label concept, translated when shown');
         $this->assertContains('{City}, {State} {PostalCode}', $rules['format']);
     }
 

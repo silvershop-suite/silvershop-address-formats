@@ -11,7 +11,8 @@ safe `default` that keeps existing behaviour where no country rule applies.
 ## What it adds
 
 - **`AddressFormatRegistry`** + **`AddressFormat`** — per-ISO-country rules merged over a `default` entry, so a
-  country only declares what differs: field `labels` (Postcode / ZIP / PLZ, State → Province / County),
+  country only declares what differs: field `labels` (Postcode / ZIP code / Eircode, State → Province / Prefecture,
+  translated into the shop's language),
   `required`, `hidden` (e.g. no State for NL), `postcode_regex`, and a display `format`.
 - **`CustomerAddressExtension`** on `SilverShop\Model\Address` — relabels/hides fields per country
   (`updateFormFields`) and sets the per-country required fields (`updateRequiredFields`), **fixing the
@@ -85,6 +86,19 @@ SilverShop\AddressFormats\AddressFormatRegistry:
       postcode_regex: ''
 ```
 
+### Labels
+
+A country chooses **which term** a field gets; the **shop's language** decides how it reads. So `labels` take a
+label concept from `AddressLabels`, translated in en, nl, de, fr, it and es: an English shop shows "Street" /
+"House no." / "Postcode" for a Dutch address, a Dutch shop shows "Straat" / "Huisnr." / "Postcode", and a German shop
+"Straße" / "Hausnr." / "PLZ".
+
+Concepts: `Street`, `HouseNumber`, `Postcode`, `PostalCode`, `ZipCode`, `Eircode`, `PinCode`, `City`, `TownCity`,
+`PostTown`, `Suburb`, `SuburbTown`, `CityWard`, `Townland`, `VillageTownship`, `State`, `StateTerritory`, `Province`,
+`Prefecture`, `County`, `Department`, `District`, `DoSi`, `Emirate`, `Island`, `Oblast`, `Parish`, `Area`. Translate
+or reword one with the usual lang YAML (`SilverShop\AddressFormats\AddressLabels.Province: '…'`). Any other value is
+shown exactly as written, for a project-specific label.
+
 ## Global coverage (libaddressinput)
 
 The bundled YAML covers ~23 countries. For **every** country, install
@@ -118,7 +132,7 @@ SilverShop\AddressFormats\AddressFormatRegistry:
     AT:
       house_number: true
       required: ['Address', 'HouseNumber', 'PostalCode', 'City']
-      labels: {Address: 'Straße', HouseNumber: 'Hausnr.'}
+      labels: {Address: 'Street', HouseNumber: 'HouseNumber'}
       format: ['{Address} {HouseNumber}', '{PostalCode} {City}', '{Country}']
 ```
 
