@@ -14,6 +14,13 @@
 
     function holder(el) { return el.closest('.field') || el.parentElement; }
 
+    // Add or remove one id in the input's aria-describedby (screen readers read the referenced hint with the field).
+    function setDescribedBy(input, id, on) {
+        var ids = (input.getAttribute('aria-describedby') || '').split(/\s+/).filter(function (t) { return t && t !== id; });
+        if (on) { ids.push(id); }
+        if (ids.length) { input.setAttribute('aria-describedby', ids.join(' ')); } else { input.removeAttribute('aria-describedby'); }
+    }
+
     // Replace a label's text but keep its child elements (e.g. a theme's required "*" marker inside the label).
     function setLabelText(lbl, text) {
         for (var n = lbl.firstChild; n; n = n.nextSibling) {
@@ -125,7 +132,12 @@
                     desc.textContent = hint;
                     box.appendChild(desc);
                 }
-                if (desc) { desc.classList.toggle('addressformat-hidden', !showHint); }
+                if (desc) {
+                    if (!desc.id && input.id) { desc.id = input.id + '_description'; }
+                    desc.classList.toggle('addressformat-hidden', !showHint);
+                    // A hidden hint must not be read either (aria-describedby also reads display:none content).
+                    if (desc.id) { setDescribedBy(input, desc.id, showHint); }
+                }
             }
 
             // Net rule: a field is `required` iff it is actually visible. A field can be hidden two ways — this
