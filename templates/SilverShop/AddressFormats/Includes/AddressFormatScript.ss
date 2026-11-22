@@ -1,7 +1,11 @@
 <style>
 .addressformat-hidden,
 .field.addressformat-hidden { display: none !important; }
-</style>
+<% if $LayoutCss %>:where(.addressformat-field-group) { display: flex; flex-wrap: wrap; gap: 0 1em; align-items: flex-start; }
+:where(.addressformat-field-group) > * { flex: 1 1 12em; min-width: 0; }
+:where(.addressformat-field-group) > :where(.addressformat-narrow) { flex: 0 1 8em; }
+:where(.addressformat-field-group) :where(input, select, textarea) { width: 100%; box-sizing: border-box; }
+<% end_if %></style>
 <script type="application/json" class="addressformat-rules" data-addressformat-country="$FixedCountry.ATT">$RulesJson.RAW</script>
 <script>
 (function () {
@@ -9,6 +13,14 @@
     window.__addressFormatInit = true;
 
     function holder(el) { return el.closest('.field') || el.parentElement; }
+
+    // Replace a label's text but keep its child elements (e.g. a theme's required "*" marker inside the label).
+    function setLabelText(lbl, text) {
+        for (var n = lbl.firstChild; n; n = n.nextSibling) {
+            if (n.nodeType === 3 && n.nodeValue.trim() !== '') { n.nodeValue = text; return; }
+        }
+        lbl.insertBefore(document.createTextNode(text), lbl.firstChild);
+    }
 
     // The country <select> within a scope. On the single-page checkout the address fields are
     // component-namespaced (e.g. "…ShippingAddress_Country"), so match a plain "Country" OR any
@@ -82,6 +94,7 @@
         var hidden = rule.hidden || [];
         var required = rule.required || [];
         var labels = rule.labels || {};
+        var noDescription = rule.noDescription || [];
 
         scope.querySelectorAll('[data-addressformat-field]').forEach(function (input) {
             var name = input.getAttribute('data-addressformat-field');
@@ -93,9 +106,26 @@
             input.classList.toggle('addressformat-hidden', isHidden);
             if (box && box !== input) { box.classList.toggle('addressformat-hidden', isHidden); }
 
-            if (labels[name] && box) {
+            // This country's label, or the generic one the server kept on the input.
+            var label = labels[name] || input.getAttribute('data-addressformat-label');
+            if (label && box) {
                 var lbl = box.querySelector('label');
-                if (lbl) { lbl.textContent = labels[name]; }
+                if (lbl) { setLabelText(lbl, label); }
+            }
+
+            // The field's hint: hidden for this country (street hint where the house number is separate), else shown.
+            // The server leaves it out when the first country hides it, so re-create it (framework markup) on demand.
+            var hint = input.getAttribute('data-addressformat-description');
+            if (hint !== null && box) {
+                var desc = box.querySelector('.description');
+                var showHint = noDescription.indexOf(name) === -1;
+                if (showHint && !desc) {
+                    desc = document.createElement('span');
+                    desc.className = 'description';
+                    desc.textContent = hint;
+                    box.appendChild(desc);
+                }
+                if (desc) { desc.classList.toggle('addressformat-hidden', !showHint); }
             }
 
             // Net rule: a field is `required` iff it is actually visible. A field can be hidden two ways — this

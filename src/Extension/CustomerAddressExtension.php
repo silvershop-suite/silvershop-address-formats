@@ -73,7 +73,25 @@ class CustomerAddressExtension extends Extension
                 continue;
             }
 
+            // With live switching, keep the generic label on the input: the switcher restores it for a country that
+            // doesn't relabel the field (else a switch from NL to BE would keep "Straat").
+            if ($live) {
+                $field->setAttribute('data-addressformat-label', (string) $field->Title());
+            }
             $field->setTitle($format->labelFor($name, (string) $field->Title()));
+
+            // Core's hint, e.g. "street / thoroughfare number, name, and type or P.O. Box" under Address, doesn't fit a
+            // country with a separate house-number field. With live switching the text is kept on the input, so the
+            // switcher can bring it back when the customer picks a country without one.
+            $description = (string) $field->getDescription();
+            if ($description !== '') {
+                if ($live) {
+                    $field->setAttribute('data-addressformat-description', $description);
+                }
+                if ($format->hidesDescription($name)) {
+                    $field->setDescription('');
+                }
+            }
 
             if (!$live) {
                 continue;
@@ -339,8 +357,11 @@ class CustomerAddressExtension extends Extension
         );
 
         // Used by the script only when the form has no Country input (a single-country shop).
-        $html = (string) ArrayData::create(['RulesJson' => $json, 'FixedCountry' => $this->formCountry()])
-            ->renderWith('SilverShop/AddressFormats/Includes/AddressFormatScript');
+        $html = (string) ArrayData::create([
+            'RulesJson' => $json,
+            'FixedCountry' => $this->formCountry(),
+            'LayoutCss' => (bool) AddressFormatRegistry::config()->get('layout_css'),
+        ])->renderWith('SilverShop/AddressFormats/Includes/AddressFormatScript');
 
         return LiteralField::create('AddressFormatScript', $html);
     }

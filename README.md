@@ -45,11 +45,20 @@ an `addressformat:changed` event. Everything is overridable:
 
 - Override the template `SilverShop/AddressFormats/Includes/AddressFormatScript.ss` in your theme/project.
 - Fields are tagged `data-addressformat-field="Address|AddressLine2|City|State|PostalCode"` — style/script against that.
+- **Row layout:** fields that share a row (e.g. NL street + house number, postcode + city) are wrapped in
+  `.addressformat-field-group`, with `.addressformat-narrow` on the short ones. A minimal default layout (flex row,
+  inputs filling their column) ships with zero specificity, so any theme rule wins. Turn it off with
+  `layout_css: false` to style the rows entirely yourself.
+- **Hints:** core's street hint ("street / thoroughfare number, name, and type or P.O. Box") is hidden for countries
+  with a separate house-number field, and comes back when the customer picks a country without one.
+- Labels are swapped without touching child elements (a theme's required marker inside the label stays), and a field
+  gets its generic label back when the new country doesn't relabel it.
 - Turn it off (revert to server-side field removal, no client switching):
 
 ```yaml
 SilverShop\AddressFormats\AddressFormatRegistry:
   live_country_switching: false
+  # layout_css: false   # keep live switching but drop the default row layout
 ```
 
 ## Installation

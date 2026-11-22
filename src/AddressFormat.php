@@ -47,6 +47,15 @@ class AddressFormat
         return $this->houseNumber;
     }
 
+    /**
+     * Whether the field's hint (core's form-field description) is hidden for this country: with a separate house-number
+     * field, the street hint ("street / thoroughfare number, name, and type or P.O. Box") no longer fits.
+     */
+    public function hidesDescription(string $field): bool
+    {
+        return $field === 'Address' && $this->houseNumber;
+    }
+
     public function getCountry(): string
     {
         return $this->country;

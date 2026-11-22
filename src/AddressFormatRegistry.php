@@ -34,6 +34,12 @@ class AddressFormatRegistry
     private static bool $live_country_switching = true;
 
     /**
+     * Ship a minimal default layout for the switcher's row groups (e.g. postcode + city side by side). It has zero
+     * specificity (`:where()`), so any theme rule wins; set false to style `.addressformat-field-group` entirely yourself.
+     */
+    private static bool $layout_css = true;
+
+    /**
      * Where per-country rules come from: `config` (the YAML `formats` only, default) or `addressing` (the global
      * libaddressinput dataset via commerceguys/addressing, with YAML `formats` layered on top as overrides).
      */
@@ -106,6 +112,8 @@ class AddressFormatRegistry
                 // which managed fields pair onto one row, and which of them render narrow.
                 'groups' => array_values($format->fieldGroups()),
                 'narrow' => array_values($format->narrowFields()),
+                // Fields whose hint is hidden for this country (the street hint where the house number is separate).
+                'noDescription' => array_values(array_filter($fields, [$format, 'hidesDescription'])),
             ];
         }
 
