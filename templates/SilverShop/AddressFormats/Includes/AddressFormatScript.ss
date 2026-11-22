@@ -2,7 +2,7 @@
 .addressformat-hidden,
 .field.addressformat-hidden { display: none !important; }
 </style>
-<script type="application/json" class="addressformat-rules">$RulesJson.RAW</script>
+<script type="application/json" class="addressformat-rules" data-addressformat-country="$FixedCountry.ATT">$RulesJson.RAW</script>
 <script>
 (function () {
     if (window.__addressFormatInit) { return; }
@@ -76,7 +76,8 @@
 
     function apply(scope, rules) {
         var countryField = countryIn(scope);
-        var code = countryField ? String(countryField.value || '').toUpperCase() : '';
+        // No Country input (a shop that sells to one country): use the country the server passed.
+        var code = countryField ? String(countryField.value || '').toUpperCase() : (scope.__afCountry || '');
         var rule = rules[code] || rules['default'] || { hidden: [], required: [], labels: {}, postcodePattern: '', groups: [], narrow: [] };
         var hidden = rule.hidden || [];
         var required = rule.required || [];
@@ -135,6 +136,7 @@
 
             var rules;
             try { rules = JSON.parse(s.textContent); } catch (e) { return; }
+            scope.__afCountry = String(s.getAttribute('data-addressformat-country') || '').toUpperCase();
 
             var countryField = countryIn(scope);
             if (countryField) {

@@ -18,6 +18,7 @@ use SilverStripe\Forms\TextField;
 use SilverStripe\Core\Validation\ValidationResult;
 use SilverStripe\Model\ArrayData;
 use SilverStripe\Model\List\ArrayList;
+use SilverStripe\SiteConfig\SiteConfig;
 
 /**
  * Applied to {@link \SilverShop\Model\Address}. Makes the customer address form country-aware: relabels and hides
@@ -47,7 +48,7 @@ class CustomerAddressExtension extends Extension
      */
     public function updateFormFields(FieldList $fields): void
     {
-        $format = $this->formatFor();
+        $format = AddressFormatRegistry::singleton()->formatFor($this->formCountry());
         $live = (bool) AddressFormatRegistry::config()->get('live_country_switching');
 
         // Core doesn't provide a HouseNumber field; add it next to Address when any country could use it.
@@ -147,10 +148,10 @@ class CustomerAddressExtension extends Extension
         // During a checkout submit, follow the country the customer chose on the form, not the one saved on the address:
         // otherwise a country switch requires fields that are hidden for the new country (NL house number after
         // switching to BE), and the new country's own fields are only checked when the address is written.
+        // A shop that sells to one country has no Country input (core shows it read-only and sets it on save), so
+        // nothing is posted and the address may not have a country yet: use the shop's country, as the form does.
         $submitted = $this->submittedCheckoutCountry();
-        $format = $submitted !== null
-            ? AddressFormatRegistry::singleton()->formatFor($submitted)
-            : $this->formatFor();
+        $format = AddressFormatRegistry::singleton()->formatFor($submitted ?? $this->formCountry());
 
         if (!$format->isRequired('State') || $format->isHidden('State')) {
             unset($fields['State']);
@@ -300,9 +301,30 @@ class CustomerAddressExtension extends Extension
         return $shipping ? 'Shipping' : 'Billing';
     }
 
+    /**
+     * The format of the address's own country, or of the shop's single country while the address has none yet.
+     */
     private function formatFor(): AddressFormat
     {
-        return AddressFormatRegistry::singleton()->formatFor((string) $this->getOwner()->Country);
+        $country = trim((string) $this->getOwner()->Country);
+
+        return AddressFormatRegistry::singleton()->formatFor($country !== '' ? $country : (string) $this->singleCountry());
+    }
+
+    /**
+     * The country the front-end form is for: the shop's single country when it sells to one (core then has no Country
+     * input and sets that country on save), otherwise the address's own country.
+     */
+    private function formCountry(): string
+    {
+        return $this->singleCountry() ?? trim((string) $this->getOwner()->Country);
+    }
+
+    private function singleCountry(): ?string
+    {
+        $country = SiteConfig::current_site_config()->getSingleCountry();
+
+        return is_string($country) && $country !== '' ? strtoupper($country) : null;
     }
 
     /**
@@ -316,7 +338,8 @@ class CustomerAddressExtension extends Extension
             JSON_HEX_TAG | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE
         );
 
-        $html = (string) ArrayData::create(['RulesJson' => $json])
+        // Used by the script only when the form has no Country input (a single-country shop).
+        $html = (string) ArrayData::create(['RulesJson' => $json, 'FixedCountry' => $this->formCountry()])
             ->renderWith('SilverShop/AddressFormats/Includes/AddressFormatScript');
 
         return LiteralField::create('AddressFormatScript', $html);
